@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import * as z from "zod";
 import useStore from "../../store";
 import {useForm} from "react-hook-form"
@@ -10,6 +10,9 @@ import { Seperator } from '../../components/seperator';
 import Input from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import {BiLoader} from "react-icons/bi"
+import { toast } from 'sonner';
+import api from "../../libs/apiCall"; // ✅ make sure this is present
+
 const LoginSchema = z.object({
   email: z
     .string({ required_error: "Email is required" })
@@ -18,12 +21,12 @@ const LoginSchema = z.object({
 
   password: z
     .string({ required_error: "Password is required" })
-    .min(1, "Password is required"),
+    .min(8, "Password must be at least 8 characters"),
 });
 
 
 const SignIn = () => {
-  const {user}  =  useStore(state=> state )
+  const {user, setCredentials}  =  useStore(state=> state )
   const {
     register,
     handleSubmit,
@@ -35,20 +38,33 @@ const SignIn = () => {
   })
 
   const navigate = useNavigate()
-  const [loading, setloading]  = useState()
+  const [loading, setLoading]  = useState()
 
   useEffect(()=>{
-
-    user && navigate("/")
-
-
-    
+    if (user) {
+      navigate("/overview");
+    }
   },[user])
 
 
-  const onSubmit  =async(data)   =>{
-    console.log(data)
-  }
+  const onSubmit = async (data) => {
+    try {
+      setLoading(true);
+      const { data: res } = await api.post("/auth/sign-in", data);
+      if (res?.user) {
+        toast.success(res?.message || "Login successful");
+        const userInfo = { ...res?.user, token: res?.token };
+        localStorage.setItem("user", JSON.stringify(userInfo));
+        setCredentials(userInfo);
+        navigate("/overview");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error?.response?.data?.message || error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   
   return (
@@ -57,14 +73,14 @@ const SignIn = () => {
         <div className="p-6 md:p-8">
           <CardHeader className="pb-4">
             <CardTitle className="text-2xl font-semibold dark:text-white">
-              Sign  In
+              Welcome back
             </CardTitle>
           </CardHeader>
   
           <CardContent className="p-0">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div className="space-y-6">
-                <SocialAuth isLoading={loading} setloading={setloading} />
+                <SocialAuth isLoading={loading} />
                 <Seperator />
   
              
@@ -106,10 +122,10 @@ const SignIn = () => {
           </CardContent>
         </div>
         <CardFooter className="justify-center gap-2">
-          <p className='text-sm text-gray-600'>Already have an account</p>
-          <Link  to = "/sign-in"
+          <p className='text-sm text-gray-600'>Don't have an account</p>
+          <Link  to = "/sign-up"
           className='text-sm font-semibold text-violet-600 hover:underline'>
-            Sign In
+            Sign Up
           </Link>
 
         </CardFooter>

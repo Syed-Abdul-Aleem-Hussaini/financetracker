@@ -39,17 +39,19 @@ const Signup = () => {
   const [loading, setLoading] = useState(false); // ✅ corrected camelCase
 
   useEffect(() => {
-    if (user) navigate("/");
+    if (user) {
+      navigate("/overview");
+    }
   }, [user, navigate]);
 
   const onSubmit = async (data) => {
     try {
       setLoading(true);
-      const { data: res } = await api.post("/auth/signup", data);
+      const { data: res } = await api.post("/auth/sign-up", data);
       if (res?.user) {
         toast.success("Account created successfully. You can log in now.");
         setTimeout(() => {
-          navigate("/sign-in"); // ✅ added "/" and delay
+          navigate("/sign-in");
         }, 1500);
       }
     } catch (error) {

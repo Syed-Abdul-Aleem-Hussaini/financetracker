@@ -3,43 +3,68 @@ import { comparePassword, createJWT, hashPassword } from "../libs/index.js";
 
 export const signupUser = async (req, res) => {
   try {
-    const { firstName, email, password } = req.body;
+    const { firstName, email, password, provider, uid } = req.body;
     
-    if (!firstName || !email || !password) {
+    console.log('Received signup request:', { firstName, email, provider, uid });
+    
+    if (!firstName || !email) {
       return res.status(400).json({
         status: "failed",
         message: "Provide Required Fields!",
       });
     }
 
-    const userExist =  await pool.query({
+    const userExist = await pool.query({
       text: "SELECT EXISTS (SELECT 1 FROM tbluser WHERE email = $1)",
       values: [email],
     });
 
     if (userExist.rows[0].exists) {   
-      return res.status(409).json({
-        status: "failed",
-        message: "Email already exists. Try logging in!",
+      // If user exists, return success with user data
+      const existingUser = await pool.query({
+        text: "SELECT * FROM tbluser WHERE email = $1",
+        values: [email],
+      });
+      
+      const token = createJWT(existingUser.rows[0].id);
+      existingUser.rows[0].password = undefined;
+
+      return res.status(200).json({
+        status: "success",
+        message: "Login successful",
+        user: existingUser.rows[0],
+        token,
       });
     }
 
-    const hashedPassword = await hashPassword(password);
+    // For social auth users, use a random password
+    const hashedPassword = password ? await hashPassword(password) : await hashPassword(Math.random().toString(36));
 
-    const newUser = await pool.query({
-      text: "INSERT INTO tbluser (firstname, email, password) VALUES ($1, $2, $3) RETURNING *",
-      values: [firstName, email, hashedPassword],
-    });
+    try {
+      const newUser = await pool.query({
+        text: "INSERT INTO tbluser (firstname, email, password, provider, uid) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+        values: [firstName, email, hashedPassword, provider || 'local', uid || null],
+      });
 
-    newUser.rows[0].password = undefined;
+      newUser.rows[0].password = undefined;
+      const token = createJWT(newUser.rows[0].id);
 
-    res.status(201).json({
-      status: "success",
-      message: "User account created successfully",
-      user: newUser.rows[0],
-    });
+      res.status(201).json({
+        status: "success",
+        message: "User account created successfully",
+        user: newUser.rows[0],
+        token,
+      });
+    } catch (dbError) {
+      console.error('Database error:', dbError);
+      return res.status(500).json({ 
+        status: "failed", 
+        message: "Error creating user account",
+        error: dbError.message 
+      });
+    }
   } catch (error) {
-    console.error(error);
+    console.error('Signup error:', error);
     res.status(500).json({ status: "failed", message: error.message });
   }
 };
