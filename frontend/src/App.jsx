@@ -10,6 +10,7 @@ import Transaction from './pages/transaction'
 import useStore from './store'
 import { setAuthToken } from './libs/apiCall'
 import {Toaster} from "sonner"
+import Navbar from './components/ui/navbar'
 
 const RootLayout   = () =>{
   const user = useStore((state) => state);
@@ -20,6 +21,7 @@ setAuthToken(user?.token||"");
   :(
   <>
   {}
+  <Navbar/>
   <div className='min-h-[cal(h-screen-100px)]'>
     
     <Outlet />
