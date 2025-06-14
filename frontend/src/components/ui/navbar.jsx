@@ -12,7 +12,7 @@ import TransitionWrapper from "/src/components/wrappers/transition-wrapper.jsx";
 const links = [
   { label: "Dashboard", link: "/overview" },
   { label: "Transactions", link: "/transactions" },
-  { label: "Accounts", link: "/accounts" },
+  { label: "Accountpage", link: "/account" },
   { label: "Settings", link: "/settings" },
 ];
 

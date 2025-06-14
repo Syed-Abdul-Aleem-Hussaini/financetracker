@@ -16,10 +16,12 @@ const RootLayout   = () =>{
   const user = useStore((state) => state);
 
 setAuthToken(user?.token||"");
-
+const theme = "light"
   return ! user ? (<Navigate to   = "/sign-in"  replace = {true} />)
   :(
   <>
+  <main className={theme}>
+    
   {}
   <Navbar/>
   <div className='min-h-[cal(h-screen-100px)]'>
@@ -27,17 +29,19 @@ setAuthToken(user?.token||"");
     <Outlet />
   </div>
   
+  </main>
   </>
   )
 }
 function App() {
 
- 
+ const theme = "light"
 
 const [count,setCount]  =useState(0)
   return (
     <>
-<div className='w-full min-h-screen px-6 bg-gray-100 md:px2-0  dark:bg-slate-900'>
+<main className={theme}>
+  <div className='w-full min-h-screen px-6 md:px2-0  bg-white  dark:bg-slate-900'>
 <Routes>
 <Route path  = "/sign-in" element =  {<SignIn/>} /> 
 
@@ -60,6 +64,7 @@ const [count,setCount]  =useState(0)
 </div>
 <Toaster richColors position = "top-center"/>
 
+</main>
     </>
   )
 }
