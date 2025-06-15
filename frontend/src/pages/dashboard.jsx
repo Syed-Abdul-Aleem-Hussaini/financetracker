@@ -10,6 +10,10 @@ import Transactions from "../components/ui/transactions"
 const Dashboard = () => {
    // Replace with actual logic if using theme switching
 
+   const [data,setData] =  useState([])
+   
+
+
   return (
     <main >
      
