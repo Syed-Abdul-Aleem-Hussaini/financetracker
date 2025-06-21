@@ -3,11 +3,13 @@ import React, { useState } from "react";
 import { MdOutlineClose, MdOutlineKeyboardArrowDown } from "react-icons/md";
 import { RiCurrencyFill } from "react-icons/ri";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-
 import { IoIosMenu } from "react-icons/io";
 import useStore from "/src/store/index.js";
-import ThemeSwitch from "/src/components/switch.jsx"
+import ThemeSwitch from "/src/components/switch.jsx";
 import TransitionWrapper from "/src/components/wrappers/transition-wrapper.jsx";
+import { signOut } from "firebase/auth";
+import { auth } from "/src/libs/firebaseConfig";
+import { toast } from "sonner";
 
 const links = [
   { label: "Dashboard", link: "/overview" },
@@ -17,42 +19,48 @@ const links = [
 ];
 
 const UserMenu = () => {
-  const { user, setCredentails } = useStore((state) => state);
+  const { user, setCredentials } = useStore((state) => state);
   const navigate = useNavigate();
 
-  const handleSingout = () => {
-    localStorage.removeItem("user");
-    setCredentails(null);
-    navigate("/sign-in");
+  const handleSignout = async () => {
+    try {
+      await signOut(auth); // Firebase logout
+      localStorage.removeItem("user");
+      setCredentials(null);
+      navigate("/sign-in");
+    } catch (err) {
+      console.error("Error signing out:", err);
+      toast.error("Sign out failed");
+    }
   };
 
   return (
-    <Menu as='div' className='relative  z-50'>
+    <Menu as="div" className="relative z-50">
       <div>
-        <Menu.Button className=''>
-          <div className='flex items-center gap-2'>
-            <div className='w-10 2xl:w-12 h-10 2xl:h-12 rounded-full text-white bg-violet-600 cursor-pointer flex items-center justify-center'>
-              <p className='text-2xl font-bold'>{user?.firstname?.charAt(0)}</p>
+        <Menu.Button>
+          <div className="flex items-center gap-2">
+            <div className="w-10 2xl:w-12 h-10 2xl:h-12 rounded-full text-white bg-violet-600 cursor-pointer flex items-center justify-center">
+              <p className="text-2xl font-bold">{user?.firstname?.charAt(0)}</p>
             </div>
-            <div className='hidden md:block text-left'>
-              <p className='text-lg font-medium text-black dark:text-gray-400'>
+            <div className="hidden md:block text-left">
+              <p className="text-lg font-medium text-black dark:text-gray-400">
                 {user?.firstname}
               </p>
-              <span className='text-sm text-gray-700 dark:text-gray-500'>
+              <span className="text-sm text-gray-700 dark:text-gray-500">
                 {user?.email}
               </span>
             </div>
-            <MdOutlineKeyboardArrowDown className='hidden md:block text-2xl text-gray-600 dark:text-gray-300 cursor-pointer' />
+            <MdOutlineKeyboardArrowDown className="hidden md:block text-2xl text-gray-600 dark:text-gray-300 cursor-pointer" />
           </div>
         </Menu.Button>
       </div>
       <TransitionWrapper>
-        <Menu.Items className='absolute z-50 right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white dark:bg-slate-800  shadow-lg ring-1 ring-black/5 focus:outline-none'>
-          <div className='px-1 py-1 '>
+        <Menu.Items className="absolute z-50 right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white dark:bg-slate-800 shadow-lg ring-1 ring-black/5 focus:outline-none">
+          <div className="px-1 py-1">
             <Menu.Item>
               {({ active }) => (
                 <button
-                  onClick={handleSingout}
+                  onClick={handleSignout}
                   className={`${
                     active
                       ? "bg-violet-500/10 text-gray-900 dark:text-white"
@@ -75,19 +83,18 @@ const MobileSidebar = () => {
   const path = location.pathname;
 
   return (
-    <div className=''>
-      <Popover className=''>
+    <div>
+      <Popover>
         {({ open }) => (
           <>
             <Popover.Button
-              className={`
-               flex md:hidden items-center rounded-md font-medium focus:outline-none text-gray-600 dark:text-gray-400`}
+              className="flex md:hidden items-center rounded-md font-medium focus:outline-none text-gray-600 dark:text-gray-400"
             >
               {open ? <MdOutlineClose size={26} /> : <IoIosMenu size={26} />}
             </Popover.Button>
             <TransitionWrapper>
-              <Popover.Panel className='absolute left-1/2 z-50 bg-white dark:bg-slate-800 mt-3 w-screen max-w-sm -translate-x-1/2 transform px-4 py-6'>
-                <div className='flex flex-col space-y-2'>
+              <Popover.Panel className="absolute left-1/2 z-50 bg-white dark:bg-slate-800 mt-3 w-screen max-w-sm -translate-x-1/2 transform px-4 py-6">
+                <div className="flex flex-col space-y-2">
                   {links.map(({ label, link }, index) => (
                     <Link to={link} key={index}>
                       <Popover.Button
@@ -102,7 +109,7 @@ const MobileSidebar = () => {
                     </Link>
                   ))}
 
-                  <div className='flex items-center justify-between py-6 px-4'>
+                  <div className="flex items-center justify-between py-6 px-4">
                     <Popover.Button>
                       <ThemeSwitch />
                     </Popover.Button>
@@ -121,22 +128,21 @@ const MobileSidebar = () => {
 const Navbar = () => {
   const location = useLocation();
   const path = location.pathname;
-  const [openSidebar, setOpenSidebar] = useState(false);
 
   return (
-    <div className='w-full flex items-center justify-between py-6'>
-      <Link to='/'>
-        <div className='flex items-center gap-2 cursor-pointer'>
-          <div className='w-10 md:w-12 h-10 md:h-12 flex items-center justify-center bg-violet-700 rounded-xl'>
-            <RiCurrencyFill className='text-white text-3xl hover:animate-spin' />
+    <div className="w-full flex items-center justify-between py-6">
+      <Link to="/">
+        <div className="flex items-center gap-2 cursor-pointer">
+          <div className="w-10 md:w-12 h-10 md:h-12 flex items-center justify-center bg-violet-700 rounded-xl">
+            <RiCurrencyFill className="text-white text-3xl hover:animate-spin" />
           </div>
-          <span className='text-xl font-bold text-black dark:text-white'>
+          <span className="text-xl font-bold text-black dark:text-white">
             My-Finance
           </span>
         </div>
       </Link>
 
-      <div className='hidden md:flex items-center gap-4'>
+      <div className="hidden md:flex items-center gap-4">
         {links.map(({ label, link }, index) => (
           <div
             key={index}
@@ -151,13 +157,12 @@ const Navbar = () => {
         ))}
       </div>
 
-      <div className='hidden md:flex items-center gap-10 2xl:gap-20'>
+      <div className="hidden md:flex items-center gap-10 2xl:gap-20">
         <ThemeSwitch />
-
         <UserMenu />
       </div>
 
-      <div className='flex md:hidden'>
+      <div className="flex md:hidden">
         <MobileSidebar />
       </div>
     </div>
