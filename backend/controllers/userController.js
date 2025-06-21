@@ -42,7 +42,8 @@ export const getUser  = async (req , res)=>{
 export const updateUser  = async (req , res)=>{
     try{
 
-      const {userId}  = req.body.user;
+     const { userId } = req.user; // get userId from middleware
+
       const {firstname ,lastname,country,currency,contact}  = req.body
       const userExist =  await pool.query({
          text: "select * from tbluser where id = $1",

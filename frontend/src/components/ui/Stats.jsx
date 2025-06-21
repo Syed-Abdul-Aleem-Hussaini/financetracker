@@ -2,27 +2,8 @@ import React from "react";
 import { BsCashCoin, BsCurrencyDollar } from "react-icons/bs";
 import { IoMdArrowDown, IoMdArrowUp } from "react-icons/io";
 import { SiCashapp } from "react-icons/si";
+import { formatCurrency } from "../../libs/index";
 
-const data = [
-  {
-    label: "Your Total Balance",
-    amount: "100,020.00",
-    increase: 10.9,
-    icon: <BsCurrencyDollar size={26} />,
-  },
-  {
-    label: "Total Income",
-    amount: "150,010.00",
-    icon: <BsCashCoin size={26} />,
-    increase: 8.9,
-  },
-  {
-    label: "Total Expense",
-    amount: "50,010.00",
-    icon: <SiCashapp size={26} />,
-    increase: -10.9,
-  },
-];
 
 const ICON_STYLES = [
   "bg-blue-300 text-blue-800",
@@ -30,7 +11,33 @@ const ICON_STYLES = [
   "bg-rose-300 text-rose-800",
 ];
 
-const Stats = () => {
+const Stats = ({dt}) => {
+
+
+
+ 
+
+  
+const data = [
+  {
+    label: "Your Total Balance",
+    amount: dt?.balance,
+    increase: 10.9,
+    icon: <BsCurrencyDollar size={26} />,
+  },
+  {
+    label: "Total Income",
+    amount: dt?.income,
+    icon: <BsCashCoin size={26} />,
+    increase: 8.9,
+  },
+  {
+    label: "Total Expense",
+    amount: dt?.expense,
+    icon: <SiCashapp size={26} />,
+    increase: -10.9,
+  },
+];
   return (
     <div className='grid grid-cols-1 md:grid-cols-3 gap-4 w-full mb-8'>
       {data.map((item, index) => (
@@ -50,7 +57,7 @@ const Stats = () => {
                 {item.label}
               </span>
               <p className='text-xl font-medium text-black dark:text-gray-200'>
-                ${item.amount}
+               {formatCurrency(item?.amount||0.0)}
               </p>
             </div>
           </div>

@@ -3,7 +3,7 @@ import React from "react";
 const Input = React.forwardRef(
   ({ className = "", type = "text", label, error, ...props }, ref) => {
     return (
-      <div className="space-y-1">
+      <div className=" space-y-1">
         {label && (
           <label className="text-sm font-medium text-gray-800 dark:text-gray-200">
             {label}
